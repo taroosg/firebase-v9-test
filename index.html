@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <form>
+    name<input type="text" id="name">
+    text<input type="text" id="text">
+    <button type="button" id="button">submit</button>
+  </form>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const targetCollection = 'chat';
+
+    // 追加
+    document.getElementById('button').addEventListener('click', async () => {
+      console.log({
+        name: document.getElementById('name').value,
+        text: document.getElementById('text').value,
+      });
+      const docRef = await addDoc(collection(db, targetCollection), {
+        name: document.getElementById('name').value,
+        text: document.getElementById('text').value,
+        time: serverTimestamp(),
+      });
+      console.log("Document written with ID: ", docRef.id);
+    })
+
+    // 参照
+    const unsub = onSnapshot(collection(db, targetCollection), (querySnapshot) => {
+      console.log(querySnapshot.docs.map((x) => { return { id: x.id, data: x.data() } }));
+    });
+
+  </script>
+
+</body>
+
+</html>
