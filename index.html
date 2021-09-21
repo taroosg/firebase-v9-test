@@ -13,11 +13,12 @@
     name<input type="text" id="name">
     text<input type="text" id="text">
     <button type="button" id="button">submit</button>
+    <ul id="output"></ul>
   </form>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, } from "https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js";
 
     const firebaseConfig = {
     };
@@ -41,8 +42,30 @@
     })
 
     // 参照
-    const unsub = onSnapshot(collection(db, targetCollection), (querySnapshot) => {
-      console.log(querySnapshot.docs.map((x) => { return { id: x.id, data: x.data() } }));
+    const q = query(collection(db, 'chat'), orderBy('time', 'desc'));
+    onSnapshot(q, (querySnapshot) => {
+      // console.log(querySnapshot.docs.map((x) => { return { id: x.id, data: x.data() } }));
+      const dataArray = [];	// 必要なデータだけが入った新しい配列を作成
+      querySnapshot.docs.forEach(function (doc) {
+        const data = {
+          id: doc.id,
+          data: doc.data(),
+        }
+        dataArray.push(data);
+      });
+      console.log(dataArray);
+      const tagArray = [];		// `dataArray`は前回出てきたオブジェクトの配列
+      dataArray.forEach(function (data) {
+        tagArray.push(`
+      <li id=${data.id}>
+        <p>${data.data.name}</p>
+        <p>${data.data.text}</p>
+        <p>${data.data.time.seconds}</p>
+      </li>
+   `)
+      })
+      console.log(tagArray)
+      document.getElementById('output').innerHTML = tagArray.join('')
     });
 
   </script>
